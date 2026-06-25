@@ -14,13 +14,13 @@ def home():
 
     <form action="/search">
         <p>Origin Airport</p>
-        <input name="origin" placeholder="DEL">
+        <input name="origin" placeholder="DEL" required>
 
         <p>Destination Airport</p>
-        <input name="destination" placeholder="KUL">
+        <input name="destination" placeholder="KUL" required>
 
         <p>Date</p>
-        <input name="date" type="date">
+        <input name="date" type="date" required>
 
         <br><br>
         <button type="submit">Search Flights</button>
@@ -28,9 +28,12 @@ def home():
 
     <br>
 
-    <a href="/cheapest">
-        <button>Show Cheapest Flights From Delhi</button>
+    <p>
+    Example cheapest search:
+    <a href="/cheapest?date=2026-07-20">
+    Cheapest Flights From Delhi
     </a>
+    </p>
     """
 
 
@@ -65,12 +68,12 @@ def search():
 
     data = response.json()
 
-    html = f"<h1>Flights from {origin.upper()} to {destination.upper()}</h1>"
-
     itineraries = data.get("itineraries", [])
 
+    html = f"<h1>Flights from {origin.upper()} to {destination.upper()}</h1>"
+
     if not itineraries:
-        return "<h2>No flights found.</h2>"
+        return html + "<p>No flights found.</p>"
 
     for flight in itineraries:
         carrier = flight["outbound"]["carrier"]
@@ -78,12 +81,18 @@ def search():
         currency = flight["price"]["currency"]
         duration = flight["outbound"]["duration_minutes"]
 
+        if currency == "USD":
+            inr_price = int(price * 86)
+            price_text = f"₹{inr_price:,}"
+        else:
+            price_text = f"{price} {currency}"
+
         html += f"""
-        <div style='border:1px solid black;
+        <div style='border:1px solid #ccc;
                     margin:10px;
                     padding:10px'>
             <h3>{carrier}</h3>
-            <p>Price: {price} {currency}</p>
+            <p>Price: {price_text}</p>
             <p>Duration: {duration} minutes</p>
         </div>
         """
@@ -118,54 +127,46 @@ def test():
 
 @app.route("/cheapest")
 def cheapest():
-       destinations = {
-    # Sri Lanka
-    "Colombo": "CMB",
+    date = request.args.get("date")
 
-    # Indonesia
-    "Bali (Denpasar)": "DPS",
-    "Jakarta": "CGK",
-    "Surabaya": "SUB",
+    if not date:
+        return """
+        <h2>Please provide a date.</h2>
+        Example:
+        /cheapest?date=2026-07-20
+        """
 
-    # Malaysia
-    "Kuala Lumpur": "KUL",
-    "Penang": "PEN",
-    "Langkawi": "LGK",
-    "Kota Kinabalu": "BKI",
-
-    # Thailand
-    "Bangkok": "BKK",
-    "Phuket": "HKT",
-    "Krabi": "KBV",
-    "Chiang Mai": "CNX",
-
-    # Singapore
-    "Singapore": "SIN",
-
-    # Mauritius
-    "Mauritius": "MRU",
-
-    # Maldives
-    "Male": "MLE",
-
-    # Vietnam
-    "Ho Chi Minh City": "SGN",
-    "Hanoi": "HAN",
-    "Da Nang": "DAD"
-}
-
-    date = "2026-07-20"
+    destinations = {
+        "Colombo": "CMB",
+        "Bali (Denpasar)": "DPS",
+        "Jakarta": "CGK",
+        "Surabaya": "SUB",
+        "Kuala Lumpur": "KUL",
+        "Penang": "PEN",
+        "Langkawi": "LGK",
+        "Kota Kinabalu": "BKI",
+        "Bangkok": "BKK",
+        "Phuket": "HKT",
+        "Krabi": "KBV",
+        "Chiang Mai": "CNX",
+        "Singapore": "SIN",
+        "Mauritius": "MRU",
+        "Male": "MLE",
+        "Ho Chi Minh City": "SGN",
+        "Hanoi": "HAN",
+        "Da Nang": "DAD"
+    }
 
     results = []
 
+    url = "https://ignav.com/api/fares/one-way"
+
+    headers = {
+        "X-Api-Key": IGNAV_API_KEY,
+        "Content-Type": "application/json"
+    }
+
     for city, code in destinations.items():
-        url = "https://ignav.com/api/fares/one-way"
-
-        headers = {
-            "X-Api-Key": IGNAV_API_KEY,
-            "Content-Type": "application/json"
-        }
-
         payload = {
             "origin": "DEL",
             "destination": code,
@@ -177,11 +178,10 @@ def cheapest():
                 url,
                 headers=headers,
                 json=payload,
-                timeout=30
+                timeout=15
             )
 
             data = response.json()
-
             itineraries = data.get("itineraries", [])
 
             if itineraries:
@@ -199,18 +199,20 @@ def cheapest():
 
     results.sort(key=lambda x: x[2])
 
-    html = "<h1>Cheapest Flights From Delhi ✈️</h1>"
+    html = f"<h1>Cheapest Flights From Delhi ({date}) ✈️</h1>"
 
     if not results:
-        return "<h2>No flight data found.</h2>"
+        return html + "<p>No flights found.</p>"
 
     for city, code, price in results:
+        inr_price = int(price * 86)
+
         html += f"""
-        <div style='border:1px solid black;
+        <div style='border:1px solid #ccc;
                     margin:10px;
                     padding:10px'>
             <h3>{city} ({code})</h3>
-            <p>Cheapest Price: ${price}</p>
+            <p>Approx Price: ₹{inr_price:,}</p>
         </div>
         """
 
