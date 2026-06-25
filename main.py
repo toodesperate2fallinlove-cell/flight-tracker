@@ -118,7 +118,7 @@ def test():
 
 @app.route("/cheapest")
 def cheapest():
-        destinations = {
+       destinations = {
     # Sri Lanka
     "Colombo": "CMB",
 
@@ -151,7 +151,8 @@ def cheapest():
     # Vietnam
     "Ho Chi Minh City": "SGN",
     "Hanoi": "HAN",
-    "Da Nang": "DAD"    }
+    "Da Nang": "DAD"
+}
 
     date = "2026-07-20"
 
