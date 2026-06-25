@@ -12,7 +12,52 @@ def home():
     return "Flight Tracker API is running!"
 
 
-@app.route("/search")
+@app.route("@app.route("/search")
+def search():
+    origin = request.args.get("origin")
+    destination = request.args.get("destination")
+    date = request.args.get("date")
+
+    url = "https://ignav.com/api/fares/one-way"
+
+    headers = {
+        "X-Api-Key": IGNAV_API_KEY,
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "origin": origin,
+        "destination": destination,
+        "departure_date": date
+    }
+
+    response = requests.post(
+        url,
+        headers=headers,
+        json=payload
+    )
+
+    data = response.json()
+
+    html = f"<h1>Flights from {origin} to {destination}</h1>"
+
+    for flight in data.get("itineraries", []):
+        carrier = flight["outbound"]["carrier"]
+        price = flight["price"]["amount"]
+        currency = flight["price"]["currency"]
+        duration = flight["outbound"]["duration_minutes"]
+
+        html += f"""
+        <div style='border:1px solid black;
+                    margin:10px;
+                    padding:10px'>
+            <h3>{carrier}</h3>
+            <p>Price: {price} {currency}</p>
+            <p>Duration: {duration} minutes</p>
+        </div>
+        """
+
+    return html")
 def search():
     origin = request.args.get("origin")
     destination = request.args.get("destination")
