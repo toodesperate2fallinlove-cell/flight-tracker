@@ -118,14 +118,40 @@ def test():
 
 @app.route("/cheapest")
 def cheapest():
-    destinations = {
-        "Colombo": "CMB",
-        "Kuala Lumpur": "KUL",
-        "Bali": "DPS",
-        "Mauritius": "MRU",
-        "Bangkok": "BKK",
-        "Singapore": "SIN"
-    }
+        destinations = {
+    # Sri Lanka
+    "Colombo": "CMB",
+
+    # Indonesia
+    "Bali (Denpasar)": "DPS",
+    "Jakarta": "CGK",
+    "Surabaya": "SUB",
+
+    # Malaysia
+    "Kuala Lumpur": "KUL",
+    "Penang": "PEN",
+    "Langkawi": "LGK",
+    "Kota Kinabalu": "BKI",
+
+    # Thailand
+    "Bangkok": "BKK",
+    "Phuket": "HKT",
+    "Krabi": "KBV",
+    "Chiang Mai": "CNX",
+
+    # Singapore
+    "Singapore": "SIN",
+
+    # Mauritius
+    "Mauritius": "MRU",
+
+    # Maldives
+    "Male": "MLE",
+
+    # Vietnam
+    "Ho Chi Minh City": "SGN",
+    "Hanoi": "HAN",
+    "Da Nang": "DAD"    }
 
     date = "2026-07-20"
 
