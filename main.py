@@ -137,24 +137,14 @@ def cheapest():
         """
 
     destinations = {
-        "Colombo": "CMB",
-        "Bali (Denpasar)": "DPS",
-        "Jakarta": "CGK",
-        "Surabaya": "SUB",
-        "Kuala Lumpur": "KUL",
-        "Penang": "PEN",
-        "Langkawi": "LGK",
-        "Kota Kinabalu": "BKI",
-        "Bangkok": "BKK",
-        "Phuket": "HKT",
-        "Krabi": "KBV",
-        "Chiang Mai": "CNX",
-        "Singapore": "SIN",
-        "Mauritius": "MRU",
-        "Male": "MLE",
-        "Ho Chi Minh City": "SGN",
-        "Hanoi": "HAN",
-        "Da Nang": "DAD"
+     "Colombo": "CMB",
+    "Bali": "DPS",
+    "Kuala Lumpur": "KUL",
+    "Bangkok": "BKK",
+    "Singapore": "SIN",
+    "Mauritius": "MRU",
+    "Male": "MLE",
+    "Phuket": "HKT"
     }
 
     results = []
