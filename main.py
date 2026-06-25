@@ -9,14 +9,33 @@ IGNAV_API_KEY = os.getenv("IGNAV_API_KEY")
 
 @app.route("/")
 def home():
-    return "Flight Tracker API is running!"
+    return """
+    <h1>Delhi Flight Tracker ✈️</h1>
+
+    <form action="/search">
+        <p>Origin Airport</p>
+        <input name="origin" placeholder="DEL">
+
+        <p>Destination Airport</p>
+        <input name="destination" placeholder="KUL">
+
+        <p>Date</p>
+        <input name="date" type="date">
+
+        <br><br>
+        <button type="submit">Search Flights</button>
+    </form>
+    """
 
 
-@app.route("@app.route("/search")
+@app.route("/search")
 def search():
     origin = request.args.get("origin")
     destination = request.args.get("destination")
     date = request.args.get("date")
+
+    if not origin or not destination or not date:
+        return "Please provide origin, destination and date."
 
     url = "https://ignav.com/api/fares/one-way"
 
@@ -34,7 +53,8 @@ def search():
     response = requests.post(
         url,
         headers=headers,
-        json=payload
+        json=payload,
+        timeout=30
     )
 
     data = response.json()
@@ -57,38 +77,7 @@ def search():
         </div>
         """
 
-    return html")
-def search():
-    origin = request.args.get("origin")
-    destination = request.args.get("destination")
-    date = request.args.get("date")
-
-    if not origin or not destination or not date:
-        return jsonify({
-            "error": "Please provide origin, destination and date"
-        }), 400
-
-    url = "https://ignav.com/api/fares/one-way"
-
-    headers = {
-        "X-Api-Key": IGNAV_API_KEY,
-        "Content-Type": "application/json"
-    }
-
-    payload = {
-        "origin": origin,
-        "destination": destination,
-        "departure_date": date
-    }
-
-    response = requests.post(
-        url,
-        headers=headers,
-        json=payload,
-        timeout=30
-    )
-
-    return jsonify(response.json())
+    return html
 
 
 @app.route("/test")
@@ -117,4 +106,5 @@ def test():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
