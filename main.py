@@ -25,6 +25,12 @@ def home():
         <br><br>
         <button type="submit">Search Flights</button>
     </form>
+
+    <br>
+
+    <a href="/cheapest">
+        <button>Show Cheapest Flights From Delhi</button>
+    </a>
     """
 
 
@@ -45,8 +51,8 @@ def search():
     }
 
     payload = {
-        "origin": origin,
-        "destination": destination,
+        "origin": origin.upper(),
+        "destination": destination.upper(),
         "departure_date": date
     }
 
@@ -59,9 +65,14 @@ def search():
 
     data = response.json()
 
-    html = f"<h1>Flights from {origin} to {destination}</h1>"
+    html = f"<h1>Flights from {origin.upper()} to {destination.upper()}</h1>"
 
-    for flight in data.get("itineraries", []):
+    itineraries = data.get("itineraries", [])
+
+    if not itineraries:
+        return "<h2>No flights found.</h2>"
+
+    for flight in itineraries:
         carrier = flight["outbound"]["carrier"]
         price = flight["price"]["amount"]
         currency = flight["price"]["currency"]
@@ -103,6 +114,80 @@ def test():
     )
 
     return jsonify(response.json())
+
+
+@app.route("/cheapest")
+def cheapest():
+    destinations = {
+        "Colombo": "CMB",
+        "Kuala Lumpur": "KUL",
+        "Bali": "DPS",
+        "Mauritius": "MRU",
+        "Bangkok": "BKK",
+        "Singapore": "SIN"
+    }
+
+    date = "2026-07-20"
+
+    results = []
+
+    for city, code in destinations.items():
+        url = "https://ignav.com/api/fares/one-way"
+
+        headers = {
+            "X-Api-Key": IGNAV_API_KEY,
+            "Content-Type": "application/json"
+        }
+
+        payload = {
+            "origin": "DEL",
+            "destination": code,
+            "departure_date": date
+        }
+
+        try:
+            response = requests.post(
+                url,
+                headers=headers,
+                json=payload,
+                timeout=30
+            )
+
+            data = response.json()
+
+            itineraries = data.get("itineraries", [])
+
+            if itineraries:
+                cheapest_price = min(
+                    i["price"]["amount"]
+                    for i in itineraries
+                )
+
+                results.append(
+                    (city, code, cheapest_price)
+                )
+
+        except Exception:
+            pass
+
+    results.sort(key=lambda x: x[2])
+
+    html = "<h1>Cheapest Flights From Delhi ✈️</h1>"
+
+    if not results:
+        return "<h2>No flight data found.</h2>"
+
+    for city, code, price in results:
+        html += f"""
+        <div style='border:1px solid black;
+                    margin:10px;
+                    padding:10px'>
+            <h3>{city} ({code})</h3>
+            <p>Cheapest Price: ${price}</p>
+        </div>
+        """
+
+    return html
 
 
 if __name__ == "__main__":
